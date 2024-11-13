@@ -1,0 +1,6 @@
+on boot
+    exec u:object_r:firefox_app_exec_t:s0 -- /system/bin/python3 /data/integrity/verify_integrity.py
+
+on property:sys.firefox_allowed=1
+    exec u:object_r:firefox_app_exec_t:s0 -- /system/app/firefox/firefox.apk
+

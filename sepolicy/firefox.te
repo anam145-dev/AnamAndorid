@@ -1,0 +1,89 @@
+# Define Types for Firefox and the Custom User
+type firefox_data_file, file_type;                        # File type for /data/data/org.mozilla.firefox
+type firefox_app_data, app_data_file_type;                # Application data type for Firefox
+type firefox_exec, exec_type;                             # Execution type for Firefox executable
+type user_defined, domain;                                # Custom domain for the specific user
+type apk_data_file, file_type;                            # Type for any APK files
+type firefox_app_exec_t, file_type;                       # Type for Firefox executable files in data
+
+# Define Role for the User
+role user_defined_r types user_defined;
+user user_defined_u roles { user_defined_r };
+
+# Allow Firefox access to its data directory
+allow firefox_app_data firefox_data_file:dir { read write getattr search };
+allow firefox_app_data firefox_data_file:file { read write getattr open };
+
+# Allow Firefox executable permissions within its directory
+allow firefox_app_data firefox_app_exec_t:file { read execute open getattr };
+
+# Allow Firefox to execute necessary system files and shared libraries
+allow firefox_app_data { system_file_type exec_type }:file execute;
+allow firefox_app_data { exec_type shared_lib_type }:file { read execute getattr open };
+
+# Assign Permissions to the User Role
+allow user_defined firefox_app_exec_t:file { read execute };
+allow user_defined firefox_data_file:dir { read write search };
+allow user_defined firefox_data_file:file { read write open getattr };
+
+# Strictly Restrict Other Applications Using neverallow Rules
+# Prevent any non-Firefox domains from executing APK files
+neverallow ~firefox_app_data apk_data_file:file execute;          # Blocks all domains except firefox_app_data from executing any APK file
+
+# Prevent APK installations in directories where APKs can be stored
+neverallow ~firefox_app_data apk_data_file:dir { write add_name remove_name };
+
+# Block the creation, writing, or unlinking of APK files by non-Firefox domains
+neverallow ~firefox_app_data apk_data_file:file { create write unlink setattr getattr };
+
+# Prevent modifications to directories by non-Firefox domains (write, add_name, remove_name)
+neverallow ~firefox_app_data domain:dir { write add_name remove_name };
+
+# Specific Restrictions for Untrusted Apps
+# Prevent `untrusted_app` from executing files in app data directories
+neverallow untrusted_app app_data_file:file execute;
+
+# Prevent `untrusted_app` from installing or modifying files in /data/app, /data/data, /data/user
+neverallow untrusted_app apk_data_file:dir { write add_name remove_name };
+neverallow untrusted_app apk_data_file:file { create write unlink setattr getattr };
+
+# Prevent `untrusted_app` from writing to app data directories (stops remote installations or modifications)
+neverallow untrusted_app app_data_file:dir { write add_name remove_name };
+neverallow untrusted_app app_data_file:file { create write unlink setattr getattr };
+
+# Prevent execution of all other application data files, enforce only Firefox execution
+neverallow ~firefox_app_data app_data_file_type:file execute;
+
+# Additional Restrictions on Common Download and Storage Directories
+# Restrict `untrusted_app` from executing files in download locations, media directories, and SD card paths
+neverallow untrusted_app download_file:file execute;            # Block execution in download locations
+neverallow untrusted_app media_rw_data_file:file execute;       # Block execution in media directories
+neverallow untrusted_app sdcard_type:file execute;              # Block execution from SD card paths
+
+# Restrict all apps (except Firefox) from writing to shared storage directories
+neverallow untrusted_app download_file:dir { write add_name remove_name };
+neverallow untrusted_app media_rw_data_file:dir { write add_name remove_name };
+neverallow untrusted_app sdcard_type:dir { write add_name remove_name };
+
+# Comprehensive Restriction on Binary and Script Execution
+# Prevent untrusted apps from creating, modifying, or executing any binary or script files
+neverallow untrusted_app exec_type:file { execute execute_no_trans open write };
+neverallow untrusted_app shell_exec:file execute;
+neverallow untrusted_app { script_exec bin_exec }:file { execute execute_no_trans };
+
+# Prevent untrusted apps from modifying directories where executable scripts or binaries might be saved
+neverallow untrusted_app exec_type:dir { write add_name remove_name };
+neverallow untrusted_app shell_exec:dir { write add_name remove_name };
+neverallow untrusted_app { script_exec bin_exec }:dir { write add_name remove_name };
+
+# Python 스크립트 실행 권한 부여
+allow firefox_app_data integrity_scripts:file { read execute getattr open };
+allow firefox_app_data integrity_scripts:dir { search };
+
+# /data/integrity 디렉토리와 파일 접근 허용
+allow firefox_app_data integrity_data:file { read write open getattr };
+allow firefox_app_data integrity_data:dir { write read search };
+
+# firefox_allowed 파일이 있을 때만 Firefox 실행을 허용
+allow firefox_app_data integrity_data:file { read getattr open };
+
