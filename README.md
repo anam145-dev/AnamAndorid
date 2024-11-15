@@ -1,9 +1,15 @@
-Lenovo Tab P11 AOSP System Image Build
+아래는 GitHub에서 보기 좋도록 Markdown 형식을 유지한 README.md 파일입니다. 이 내용은 Git에 업로드했을 때도 깨지지 않고 깔끔하게 표시됩니다.
 
-Lenovo Tab P11 기기를 대상으로 AOSP 기반 시스템 이미지 빌드. 
-Firefox를 prebuilt application으로 추가하고, SELinux 정책 및 파일 무결성 검사를 설정하여 보안을 강화한다.
+---
+
+```markdown
+# Lenovo Tab P11 AOSP System Image Build
+
+이 문서는 Lenovo Tab P11 기기를 대상으로 AOSP 기반 시스템 이미지를 빌드하는 과정을 설명합니다. 이 프로젝트에서는 Firefox를 prebuilt application으로 추가하고, SELinux 정책 및 파일 무결성 검사를 설정하여 보안을 강화합니다.
 
 ## 디렉토리 구조
+
+```
 device/lenovo/Tab_P11/
 ├── Android.bp
 ├── integrity/
@@ -61,14 +67,3 @@ device/lenovo/Tab_P11/
 ## 참고 자료
 - [Build AOSP's GSI Image](https://www.notion.so/hwseclab/Build-System-Image-9a1add6c3dd440b1aeabe5c2ec521624?pvs=4)
 - [WiFi 문제 해결](https://www.notion.so/hwseclab/wifi-cae1f4956a444c1caa6dd1eb58f0f25b?pvs=4)
-
----
-
-### TODO
-- SELinux 정책 추가 테스트 및 디버깅.
-- 파일 무결성 검사 로직 강화.
-- WiFi 문제 재현 및 해결책 개선.
-
---- 
-
-이 README는 명확성과 가독성을 높이기 위해 구성되었습니다. 추가할 내용이 있다면 알려주세요!
