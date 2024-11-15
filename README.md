@@ -3,13 +3,8 @@ lenovo Tab P11 AOSP System Image Build
 이 문서는 Lenovo Tab P11 기기를 대상으로 AOSP 기반 시스템 이미지를 빌드하는 과정을 설명합니다. 이 프로젝트에서는 Firefox를 prebuilt application으로 추가하고, SELinux 정책 및 파일 무결성 검사를 설정하여 보안을 강화합니다.
 
 디렉토리 구조
-device/lenovo/Tab_P11/
-├── Android.bp
-├── integrity/
-│   ├── [파일 무결성 검사 관련 파일]
-├── sepolicy/
-│   ├── firefox.te
-│   ├── [SELinux 정책 관련 파일]
+![image](https://github.com/user-attachments/assets/6b2e2755-a850-4e6d-b174-0df17b4fcf00)
+
 
 
  디렉토리 설명
