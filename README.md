@@ -4,8 +4,6 @@ Lenovo Tab P11 기기를 대상으로 AOSP 기반 시스템 이미지를 빌드�
 Firefox를 prebuilt application으로 추가하고, SELinux 정책 및 파일 무결성 검사를 설정하여 보안을 강화한다.
 
 ## 디렉토리 구조
-![image](https://github.com/user-attachments/assets/6b2e2755-a850-4e6d-b174-0df17b4fcf00)
-
 
 
 ## 디렉토리 설명
