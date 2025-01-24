@@ -1,0 +1,23 @@
+# Create /data/integrity directory during boot
+on boot
+    mkdir /data/integrity 0700 system system
+    restorecon_recursive /data/integrity
+
+# Ensure /data/integrity directory is properly created during post-fs-data phase
+on post-fs-data
+    mkdir /data/integrity 0700 system system
+    chmod 0700 /data/integrity
+    restorecon_recursive /data/integrity
+
+# Define verifier service for integrity checking
+service verifier /system/bin/verify_integrity verify_local
+    class main
+    user root
+    group root
+    disabled
+    oneshot
+
+# Trigger verifier service before Firefox execution
+on property:sys.firefox.ready=1
+    start verifier
+

@@ -1,0 +1,96 @@
+# Define Types for Firefox and Related Files
+type firefox_data_file, file_type;                        # Type for files in /data/data/org.mozilla.firefox
+type firefox_app_data, app_data_file_type;                # Application data type for Firefox
+type firefox_exec, exec_type;                             # Execution type for Firefox executable
+type firefox_app_exec_t, file_type;                       # Type for Firefox executable files in /data
+type apk_data_file, file_type;                            # Type for any APK files
+
+# Define Types for File Integrity Checker
+type integrity_checker_exec, exec_type;                   # Type for hash_generator and verifier executables
+type integrity_data_file, file_type;                      # Type for files in /data/integrity
+type integrity_checker, domain;                           # Domain for hash_generator and verifier execution
+type remote_file_data, file_type;                         # Type for remote files to verify
+
+# Define Public Key Storage Type
+type public_key_storage, file_type;                       # Type for storing public keys
+
+# Permissions for Firefox Application
+# Allow Firefox to access its data directory
+allow firefox_app_data firefox_data_file:dir { read write getattr search };
+allow firefox_app_data firefox_data_file:file { read write getattr open };
+
+# Allow Firefox to execute files in its data directory
+allow firefox_app_data firefox_app_exec_t:file { read execute open getattr };
+
+# Allow Firefox to execute system files and shared libraries
+allow firefox_app_data { system_file_type exec_type }:file execute;
+allow firefox_app_data { exec_type shared_lib_type }:file { read execute getattr open };
+
+# Prevent non-Firefox APK installation or execution
+# Block APK execution in /data/app directory
+neverallow ~firefox_app_data apk_data_file:file execute;
+
+# Prevent non-Firefox apps from writing or modifying APK files in /data/app
+neverallow untrusted_app apk_data_file:file { write create unlink setattr };
+neverallow untrusted_app apk_data_file:dir { write add_name remove_name setattr };
+
+# Restrict Execution of APKs in Download Directory
+# Prevent execution of APKs in /storage/emulated/0/Download
+neverallow untrusted_app download_file:file { execute write create unlink setattr };
+
+# Restrict Execution in Temporary Directories
+# Prevent execution of files in /data/local/tmp
+neverallow untrusted_app tmpfs:file { execute write create unlink setattr };
+neverallow untrusted_app tmpfs:dir { write add_name remove_name setattr };
+
+# Secure Access to Public Keys, Hashes, and Manifest Files
+# Prevent access to /data/integrity and public key storage by other apps
+neverallow untrusted_app integrity_data_file:dir { read write search add_name remove_name };
+neverallow untrusted_app integrity_data_file:file { read write getattr open create unlink setattr };
+neverallow untrusted_app public_key_storage:file { read write getattr open create unlink setattr };
+
+# Permissions for hash_generator and verifier
+# Allow hash_generator to read Firefox files and write to /data/integrity
+allow integrity_checker_exec firefox_app_data:file { read getattr open };
+allow integrity_checker_exec firefox_data_file:file { read getattr open };
+allow integrity_checker_exec integrity_data_file:dir { write add_name remove_name search };
+allow integrity_checker_exec integrity_data_file:file { write getattr open };
+
+# Allow verifier to read /data/integrity and verify Firefox files
+allow integrity_checker_exec integrity_data_file:dir { read search };
+allow integrity_checker_exec integrity_data_file:file { read open getattr };
+allow integrity_checker_exec firefox_data_file:file { read getattr open };
+
+# Allow verifier to access public key storage
+allow integrity_checker_exec public_key_storage:file { read getattr open };
+
+# Allow verifier to verify remote files
+allow integrity_checker_exec remote_file_data:file { read open getattr };
+
+# Define Domain Transition for hash_generator and verifier
+type_transition firefox_app_data integrity_checker_exec:process integrity_checker;
+
+# Block Non-Firefox Executables and APKs Globally
+# Prevent untrusted apps from executing files that could become executable
+neverallow untrusted_app { script_exec bin_exec apk_data_file exec_type }:file { execute execute_no_trans open write };
+
+# Prevent untrusted apps from creating or modifying potential executable files
+neverallow untrusted_app { script_exec bin_exec apk_data_file exec_type }:file { create write unlink setattr getattr };
+
+# Prevent untrusted apps from modifying directories where executable scripts or binaries might be saved
+neverallow untrusted_app { script_exec bin_exec exec_type apk_data_file }:dir { write add_name remove_name };
+
+# Block Non-Firefox Apps from Content Providers and Cache Files
+# Prevent untrusted apps from modifying or injecting malicious URLs into Content Providers
+neverallow untrusted_app content_provider_type:file { write create setattr add_name remove_name };
+
+# Restrict access to cached APK files to the app domain only
+neverallow ~firefox_app_data apk_data_file:file { execute write create unlink setattr };
+
+# Allow hash_generator and verifier Execution
+allow system_file integrity_checker_exec:file { execute open read getattr };
+
+allow init file_integrity_exec_t:file execute;
+allow file_integrity_t integrity_data_file:dir { write read getattr search };
+allow file_integrity_t integrity_data_file:file { create write read getattr open };
+

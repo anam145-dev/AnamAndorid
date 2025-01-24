@@ -1,0 +1,48 @@
+# Firefox APK and Executable Files
+/system/product/app/Firefox/Firefox.apk         u:object_r:firefox_exec_t:s0
+/data/app/org.mozilla.firefox-*/base.apk        u:object_r:firefox_exec_t:s0
+
+# Firefox-specific Binaries
+/system/bin/firefox_binary                      u:object_r:firefox_bin_t:s0
+
+# Firefox Shared Libraries (essential for execution)
+/system/lib/firefox_lib.so                      u:object_r:firefox_lib_t:s0
+/system/lib64/firefox_lib.so                    u:object_r:firefox_lib_t:s0
+
+# Firefox Application Data Directories (restricted to executables)
+/data/data/org.mozilla.firefox(/.*)?            u:object_r:firefox_app_exec_t:s0
+/data/user/*/org.mozilla.firefox(/.*)?          u:object_r:firefox_app_exec_t:s0
+/data/user_de/*/org.mozilla.firefox(/.*)?       u:object_r:firefox_app_exec_t:s0
+
+# Temporary Files for Firefox Processes
+/tmp/firefox_temp(/.*)?                         u:object_r:firefox_tmpfs_t:s0
+/data/data/org.mozilla.firefox/tmp(/.*)?        u:object_r:firefox_tmpfs_t:s0
+
+# APK and Application Data Files
+/data/app(/.*)?                                 u:object_r:apk_data_file:s0
+/data/app/org.mozilla.firefox(/.*)?            u:object_r:apk_data_file:s0
+
+# Firefox Cache Directory
+/data/data/org.mozilla.firefox/cache(/.*)?      u:object_r:firefox_cache_t:s0
+
+# Integrity Checker Binary and Data
+/system/bin/hash_generator                      u:object_r:integrity_checker_exec:s0
+/system/bin/verifier                            u:object_r:integrity_checker_exec:s0
+/data/integrity(/.*)?                           u:object_r:integrity_data_file:s0
+/data/integrity/remote_files(/.*)?              u:object_r:remote_file_data:s0
+/data/integrity/public_key.pem                  u:object_r:public_key_storage:s0
+/data/integrity/integrity_pass                  u:object_r:integrity_pass_file:s0
+
+# Shared Storage and Download Directories
+/sdcard(/.*)?                                   u:object_r:sdcard_type:s0
+/storage/emulated(/.*)?                         u:object_r:media_rw_data_file:s0
+/mnt/media_rw(/.*)?                             u:object_r:sdcard_type:s0
+/storage/emulated/0/Download(/.*)?              u:object_r:download_file:s0
+
+# Script and Binary Execution Restrictions
+/system/bin(/.*)?                               u:object_r:bin_exec:s0
+/system/xbin(/.*)?                              u:object_r:bin_exec:s0
+/data/local/tmp(/.*)?                           u:object_r:shell_exec:s0
+
+/data/integrity(/.*)?           u:object_r:integrity_data_file:s0
+

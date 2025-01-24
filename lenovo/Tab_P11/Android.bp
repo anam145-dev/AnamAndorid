@@ -1,0 +1,42 @@
+soong_namespace {
+    imports: [
+        "system/sepolicy",
+    ],
+}
+
+cc_binary {
+    name: "hash_generator",
+    srcs: ["integrity/hash_generator.c"],
+    shared_libs: ["libcrypto", "libssl"],  // OpenSSL 라이브러리 의존성
+    host_supported: true,                 // 빌드 호스트에서 실행 가능
+}
+
+cc_binary {
+    name: "verifier",
+    srcs: ["integrity/verifier.c"],
+    shared_libs: ["libcrypto", "libssl"],  // OpenSSL 라이브러리 의존성
+    host_supported: true,                 // 빌드 호스트에서 실행 가능
+}
+
+
+prebuilt_etc {
+    name: "init_integrity", // 빌드 시스템에서 사용할 이름
+    src: "integrity/init.integrity.rc", // 실제 파일 경로
+    filename: "init.integrity.rc",      // 시스템 내 설치될 파일 이름
+    sub_dir: "init",
+}
+
+
+prebuilt_etc {
+    name: "firefox_policy_te",
+    src: "sepolicy/firefox.te",
+    sub_dir: "sepolicy",
+    filename: "firefox.te",
+}
+
+prebuilt_etc {
+    name: "firefox_file_contexts",
+    src: "sepolicy/file_contexts",
+    sub_dir: "sepolicy",
+    filename: "file_contexts",
+}
