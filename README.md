@@ -1,181 +1,193 @@
-<<<<<<< HEAD
-# lenovo Tab P11 AOSP System Image Build
+# Lenovo Tab P11 AOSP System Image Build
 
-Lenovo Tab P11 기기를 대상으로 AOSP 기반 시스템 이미지를 빌드하는 과정을 설명한다. 
-Firefox를 prebuilt application으로 추가하고, SELinux 정책 및 파일 무결성 검사를 설정하여 보안을 강화한다.
+This document explains the process of building an AOSP-based system image for the Lenovo Tab P11 device. It includes adding Firefox as a prebuilt application, enforcing SELinux policies, and implementing file integrity checks to enhance security.
 
-## 디렉토리 구조
+---
 
+## Directory Structure
 
-## 디렉토리 설명
-- sepolicy/: SELinux 정책 파일을 보관.
-  - `firefox.te`: Firefox와 관련된 SELinux 정책 정의.
-- integrity/: 파일 무결성 검사 설정 관련 파일을 보관.
-  - SELinux 정책에서 integrity 폴더 내 파일 실행을 Firefox와 연계.
-- Android.bp: 빌드 시스템에서 Tab_P11 디렉토리를 포함하기 위한 설정 파일.
+### Directory Descriptions
+- `sepolicy/`: Contains SELinux policy files.
+  - `firefox.te`: Defines SELinux policies related to Firefox.
+- `integrity/`: Stores files related to file integrity checks.
+  - SELinux policies are configured to allow Firefox to execute files within the `integrity/` folder.
+- `Android.bp`: Configuration file for including the `Tab_P11` directory in the build system.
 
+---
 
+## Key Configurations
 
-## 주요 설정
 ### 1. Prebuilt Application
-   - Firefox를 prebuilt application으로 설정.
-   - Firefox 외의 실행 파일 설치 및 실행 방지 (ADB 제외).
+- Firefox is set as a prebuilt application.
+- The installation and execution of other applications (excluding ADB) are restricted.
 
-### 2. SELinux 정책
-   - `firefox.te` 파일에서 다음 사항 설정:
-     - Firefox만 실행 가능하도록 제한.
-     - integrity 폴더 내 파일의 실행을 허용.
+### 2. SELinux Policies
+- The `firefox.te` file includes the following configurations:
+  - Restricts execution permissions to Firefox only.
+  - Allows execution of files within the `integrity/` directory.
 
-### 3. 파일 무결성 검사
-   - integrity 폴더 내에서 무결성 검사 관련 설정 파일 관리.
+### 3. File Integrity Check
+- Manages file integrity check configurations in the `integrity/` directory.
 
-### 4. 패키지 관리 제한
-   - 패키지 설치를 담당하는 Package Installer 제거.
-   - APK 설치 경로를 통한 실행 차단.
+### 4. Package Management Restrictions
+- The Package Installer is removed to prevent manual APK installations.
+- Execution of applications installed via unauthorized APK paths is blocked.
 
+---
 
+## Building the System Image
 
-## 시스템 이미지 빌드
-### AOSP 빌드 과정
-1. AOSP 소스 다운로드 및 환경 설정.
-2. `device/lenovo/Tab_P11` 디렉토리 생성 및 설정 파일 추가.
-3. 다음 명령어를 실행하여 시스템 이미지 빌드:
-   bash
+### AOSP Build Process
+1. Download the AOSP source code and set up the build environment.
+2. Create the `device/lenovo/Tab_P11` directory and add necessary configuration files.
+3. Run the following commands to build the system image:
+   ```bash
    source build/envsetup.sh
    lunch aosp_arm64-eng
    make -j$(nproc)
-   
+   ```
 
-## 빌드 시 문제 및 해결 방안
-- WiFi 문제 발생 가능성  
-  WiFi 관련 문제 발생 시 [WiFi 문제 해결](https://www.notion.so/hwseclab/wifi-cae1f4956a444c1caa6dd1eb58f0f25b?pvs=4)을 참고.
+---
 
+## Troubleshooting
 
-## 참고 자료
-- [Build AOSP's GSI Image](https://www.notion.so/hwseclab/Build-System-Image-9a1add6c3dd440b1aeabe5c2ec521624?pvs=4)
-- [WiFi 문제 해결](https://www.notion.so/hwseclab/wifi-cae1f4956a444c1caa6dd1eb58f0f25b?pvs=4)
-=======
+### Potential WiFi Issues  
+If WiFi-related problems occur, refer to the [WiFi Issue Resolution Guide](https://www.notion.so/hwseclab/wifi-cae1f4956a444c1caa6dd1eb58f0f25b?pvs=4).
+
+---
+
+## References
+- [Building AOSP GSI Image](https://www.notion.so/hwseclab/Build-System-Image-9a1add6c3dd440b1aeabe5c2ec521624?pvs=4)
+- [WiFi Issue Resolution Guide](https://www.notion.so/hwseclab/wifi-cae1f4956a444c1caa6dd1eb58f0f25b?pvs=4)
+
+---
+
 # File Integrity Check for Android
 
-This repository contains the implementation of a File Integrity Check mechanism designed to enhance the security of Android devices by preventing malicious APKs from exploiting vulnerable entry points. This approach uses a two-layer defense mechanism: file integrity checks followed by SELinux policy enforcement and Package Manager removal.
+This repository contains the implementation of a file integrity check mechanism designed to enhance Android security by preventing malicious APKs from exploiting vulnerabilities. The approach consists of a two-layer defense mechanism: file integrity checks followed by SELinux policy enforcement and the removal of the Package Manager.
 
 ---
 
 ## Overview
 
-The File Integrity Check system comprises two main components: hash_generator and verifier. These components work together to prevent the installation and execution of vulnerable `.dex` and `.so` files or modifications to pre-built application files such as `AndroidManifest.xml`.
+The file integrity check system consists of two main components: `hash_generator` and `verifier`. These components work together to prevent the installation and execution of tampered `.dex` and `.so` files, as well as unauthorized modifications to prebuilt application files such as `AndroidManifest.xml`.
 
-### Defense Layers:
-1. First Line of Defense: File Integrity Check
-   - Prevents installation of malicious files (.dex, .so) by verifying their integrity.
-   - Ensures pre-built application files (e.g., `AndroidManifest.xml`) are not tampered with.
+### Defense Mechanisms:
 
-2. Second Line of Defense: SELinux Policy Enforcement and Package Manager Removal
-   - SELinux policies restrict executable permissions to only pre-approved applications.
-   - The Package Manager is removed to block the installation of additional APKs.
+#### 1. First Line of Defense: File Integrity Check
+- Verifies the integrity of files (`.dex`, `.so`) before they are executed.
+- Ensures prebuilt application files (e.g., `AndroidManifest.xml`) remain unaltered.
+
+#### 2. Second Line of Defense: SELinux Policy Enforcement & Package Manager Removal
+- Restricts execution permissions to approved applications using SELinux policies.
+- Removes the Package Manager to prevent APK installations.
 
 ---
 
 ## Components
 
-### 1. hash_generator
-- Purpose: 
-  - Generates hash values for the following pre-built application files during the AOSP build process:
-    - `classes.dex`
-    - `.so` libraries
-    - `AndroidManifest.xml`
-  - Encrypts the SHA-256 hash values using an RSA private key.
-  - Stores the encrypted hash values in the `/data/integrity/hash_storage` directory.
+### 1. `hash_generator`
 
-- Execution: 
-  - The program runs during the AOSP build process and ensures that the generated hash values are securely stored for later verification.
+#### Purpose
+- Generates hash values for the following prebuilt application files during the AOSP build process:
+  - `classes.dex`
+  - `.so` libraries
+  - `AndroidManifest.xml`
+- Encrypts SHA-256 hash values using an RSA private key.
+- Stores the encrypted hashes in `/data/misc/integrity/firefox/`.
 
----
+#### Execution
+- Runs during the AOSP build process, ensuring secure storage of hash values for verification.
 
-### 2. verifier
-- Purpose: 
-  - Validates the integrity of files before executing pre-built applications (e.g., Firefox).
-  - Performs two types of checks:
-    - Local Verification: Compares the current hash values of the files with the pre-generated hash values from the `hash_generator`.
-    - Remote Verification: Ensures that files received from remote servers originate from trusted sources before allowing their use.
+### 2. `verifier`
 
-- Execution: 
-  - The program runs on the Android device after flashing the system image (`system.img`).
-  - It must be executed before launching pre-built applications to ensure their integrity.
+#### Purpose
+- Validates file integrity before executing prebuilt applications (e.g., Firefox).
+- Performs two verification methods:
+  - **Local Verification:** Compares current file hashes with pre-generated hashes from `hash_generator`.
+  - **Remote Verification:** Ensures received files are from trusted sources before allowing execution.
+
+#### Execution
+- Runs on the Android device after flashing the system image (`system.img`).
+- Must be executed before launching prebuilt applications to verify their integrity.
 
 ---
 
 ## File Structure
 
-The following is the directory structure for the File Integrity Check system:
-
-device/lenovo/Tab_P11/ ├── Android.bp ├── BoardConfig.mk ├── device.mk ├── integrity │ ├── hash_generator.c │ ├── init.integrity.rc │ └── verifier.c └── sepolicy ├── file_contexts └── firefox.te
-
-ruby
-코드 복사
-
-- `hash_generator.c`: Source code for hash generation during the build process.
-- `verifier.c`: Source code for file verification during application execution.
-- SELinux Policies:
-  - Policies ensure that:
-    1. All executable files (except Firefox) are blocked by default.
-    2. A dedicated SELinux domain is created for Firefox, allowing its execution.
-    3. `hash_generator` and `verifier` are allowed to execute and interact with the `/data/integrity` directory.
-  - Policies also enable `verifier` to validate remote server files securely.
+```
+device/lenovo/Tab_P11/
+├── Android.bp
+├── BoardConfig.mk
+├── device.mk
+├── integrity
+│   ├── hash_generator.c
+│   ├── init.integrity.rc
+│   └── verifier.c
+└── sepolicy
+    ├── file_contexts
+    └── firefox.te
+```
 
 ---
 
 ## SELinux Policy Highlights
 
-The SELinux policies defined in `firefox.te` ensure the security and functionality of the File Integrity Check mechanism:
+### 1. Firefox Execution Restrictions
+- Firefox can only access its own data directory (`/data/data/org.mozilla.firefox`).
+- Non-Firefox APK installations and executions are globally blocked.
 
-1. Firefox Application Restrictions:
-   - Firefox can only access its data directory (`/data/data/org.mozilla.firefox`) and execute its files.
-   - Non-Firefox APK installation or execution is blocked globally.
+### 2. Integrity Checker Permissions
+- `hash_generator` and `verifier` are granted:
+  - Read access to Firefox-related files.
+  - Write permissions for `/data/misc/integrity/firefox `.
+  - Access to public key storage for verification.
+  - Secure remote file verification capabilities.
 
-2. Integrity Checker Permissions:
-   - `hash_generator` and `verifier` are allowed to:
-     - Read Firefox-related files and write to `/data/integrity`.
-     - Access public key storage for verification purposes.
-     - Verify remote files received over the network.
+### 3. Blocking Unauthorized Executables
+- Prevents execution or modification of unauthorized APKs and executables.
+- Restricts access to temporary directories and cache files.
 
-3. Blocking Non-Firefox Executables:
-   - Prevent execution or modification of APKs or executables from untrusted apps globally.
-   - Restrict access to temporary directories and cached files.
-
-4. Domain Transitions:
-   - Ensures proper transitions for `hash_generator` and `verifier` to the defined SELinux domain.
+### 4. Domain Transitions
+- Ensures proper domain transitions for `hash_generator` and `verifier` in SELinux.
 
 ---
 
-## Build and Execution
+## Build & Execution
 
-### Building the System
-1. Add the `hash_generator` and `verifier` source files to the AOSP source tree under `/device/lenovo/Tab_P11/integrity/`.
-2. Ensure the `Android.bp`, `BoardConfig.mk`, and `device.mk` files include the necessary build configurations for:
+### System Build
+1. Add `hash_generator` and `verifier` source files to the AOSP source tree at `/device/lenovo/Tab_P11/integrity/`.
+2. Modify `Android.bp`, `BoardConfig.mk`, and `device.mk` to include:
    - `hash_generator`
    - `verifier`
    - SELinux policy files
-
 3. Build the system:
+   ```bash
    source build/envsetup.sh
    lunch <target>
    make
-   
-## Flashing the System Image
-1. Flash the built `system.img` file to the Android device:
+   ```
+
+### Flashing the System Image
+1. Flash the built `system.img` to the Android device:
+   ```bash
    fastboot flash system out/target/product/<target>/system.img
-2. Reboot the device to apply the changes:
-	fastboot reboot
-	
+   ```
+2. Reboot the device to apply changes:
+   ```bash
+   fastboot reboot
+   ```
+
+---
+
 ## Security Features
 
 ### SELinux Configuration
-1. Blocks the execution of non-Firefox APKs and restricts access to critical system files and directories.
-2. Ensures that hash_generator and verifier can run securely and perform their intended tasks.
+- Restricts execution of non-Firefox applications.
+- Protects critical system files and directories.
+- Ensures `hash_generator` and `verifier` function securely.
 
 ### Integrity Verification
-1. Prevents tampering with important files such as .dex, .so, and AndroidManifest.xml.
-2. Verifies the origin of remote files to prevent malicious replacements or unauthorized modifications
-2. Verifies the origin of remote files to prevent malicious replacements or unauthorized modifications
->>>>>>> 3b70015 (commit message)
+- Prevents tampering with `.dex`, `.so`, and `AndroidManifest.xml` files.
+- Validates remote file origins to prevent unauthorized modifications.
+
