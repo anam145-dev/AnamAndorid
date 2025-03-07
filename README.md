@@ -134,7 +134,7 @@ device/lenovo/Tab_P11/
 ## SELinux Policy Highlights
 
 ### 1. Firefox Execution Restrictions
-- Firefox can only access its own data directory (`/data/data/org.mozilla.firefox`).
+- Firefox can only access its own data directory (`/data/misc/integrity/firefox`).
 - Non-Firefox APK installations and executions are globally blocked.
 
 ### 2. Integrity Checker Permissions
